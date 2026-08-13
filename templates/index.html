@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ChemiPulse | Industrial Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-950 text-white p-8">
+    <h1 class="text-3xl font-bold mb-6 text-cyan-400">Chemical Equipment Dashboard</h1>
+    
+    <div class="grid grid-cols-3 gap-6">
+        <div class="bg-gray-900 p-6 rounded-xl border border-gray-700">
+            <h2 class="text-gray-400">Reactor Temp</h2>
+            <p id="temp" class="text-4xl font-mono text-cyan-300">--</p>
+        </div>
+        <div class="bg-gray-900 p-6 rounded-xl border border-gray-700">
+            <h2 class="text-gray-400">Pressure</h2>
+            <p id="press" class="text-4xl font-mono text-teal-300">--</p>
+        </div>
+        <div class="bg-gray-900 p-6 rounded-xl border border-gray-700">
+            <h2 class="text-gray-400">Flow Rate</h2>
+            <p id="flow" class="text-4xl font-mono text-blue-300">--</p>
+        </div>
+    </div>
+
+    <div class="mt-8 bg-gray-900 p-6 rounded-xl border border-gray-700 h-80">
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['1', '2', '3', '4', '5', '6', '7'],
+                datasets: [{ label: 'Temp', data: [], borderColor: '#22d3ee', fill: true }]
+            }
+        });
+
+        async function updateData() {
+            const res = await fetch('/api/telemetry');
+            const data = await res.json();
+            document.getElementById('temp').innerText = data.reactor_temp + " °C";
+            document.getElementById('press').innerText = data.pressure + " BAR";
+            document.getElementById('flow').innerText = data.flow_rate + " L/m";
+            
+            chart.data.datasets[0].data = data.chart_values;
+            chart.update();
+        }
+        setInterval(updateData, 2000);
+    </script>
+</body>
+</html>
